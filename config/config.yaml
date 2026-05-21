@@ -28,6 +28,9 @@ projects:
       2_QC: false
       3_Align_Filter: false
 
+# Picard 路径配置
+picard_jar: "workflow/env/picard.jar"
+
 # 线程配置
 threads: 8
 align_threads: 8

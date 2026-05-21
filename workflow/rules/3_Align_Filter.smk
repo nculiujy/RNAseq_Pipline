@@ -22,7 +22,8 @@ rule Align:
         outputdir="result/{species}/3_Align_Filter",
         threads=config.get("align_threads", 4),
         max_parallel=config.get("align_parallel", 2),
-        hisat2_index=get_hisat2_index
+        hisat2_index=get_hisat2_index,
+        picard_jar=config.get("picard_jar", "workflow/env/picard.jar")
     log:
         "logs/{species}_align.log"
     threads: 8
@@ -33,7 +34,8 @@ rule Align:
             --outputdir {params.outputdir} \
             --threads {params.threads} \
             --maxparallel {params.max_parallel} \
-            --hisat2_index {params.hisat2_index} > {log} 2>&1
+            --hisat2_index {params.hisat2_index} \
+            --picard_jar {params.picard_jar} > {log} 2>&1
         touch {output.marker}
         """
 

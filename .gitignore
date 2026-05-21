@@ -72,6 +72,9 @@ __pycache__/
 !*.fq.gz
 !*.fastq.gz
 
+# Picard JAR（体积过大，需本地下载）
+workflow/env/picard.jar
+
 # 临时文件
 *.tmp
 *.bak

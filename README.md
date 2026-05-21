@@ -134,6 +134,19 @@ conda env create -f environment.yml
 conda activate RNAseq_Pipline
 ```
 
+### Picard 安装
+
+Picard 未包含在 conda 环境中，需单独下载 JAR 文件：
+
+```bash
+cd workflow/env
+wget https://github.com/broadinstitute/picard/releases/download/3.4.0/picard.jar
+# 验证安装
+java -jar picard.jar --version
+```
+
+下载后路径默认为 `workflow/env/picard.jar`，与 [`config/config.yaml`](config/config.yaml) 中的默认配置一致。如需使用其他路径，修改配置文件中的 `picard_jar` 字段即可。详见 [`workflow/env/README.md`](workflow/env/README.md)。
+
 ---
 
 ## 快速开始
@@ -141,7 +154,7 @@ conda activate RNAseq_Pipline
 ### 1. 克隆仓库
 
 ```bash
-git clone https://github.com/YOUR_USERNAME/RNAseq_Pipline.git
+git clone https://github.com/nculiujy/RNAseq_Pipline.git
 cd RNAseq_Pipline
 ```
 

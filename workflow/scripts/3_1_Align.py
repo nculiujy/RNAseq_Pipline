@@ -14,6 +14,7 @@ def parse_args():
     parser.add_argument("--threads", type=int, default=4, help="Threads per task")
     parser.add_argument("--maxparallel", type=int, default=4, help="Max parallel tasks")
     parser.add_argument("--hisat2_index", type=str, default="", help="Path to HISAT2 index")
+    parser.add_argument("--picard_jar", type=str, default="workflow/env/picard.jar", help="Path to picard.jar")
     return parser.parse_args()
 
 def get_species_from_path(path):
@@ -96,7 +97,7 @@ def run_hisat2(sample_id, fq1, fq2, args, rel_dir, species_path):
         if os.path.exists(sam_file):
             os.remove(sam_file)
 
-        picard_jar = "/home/public_software_annotation/software/picard-2.18.2/picard.jar"
+        picard_jar = args.picard_jar
         dedup_cmd = [
             "java", "-Xmx15g", "-jar", picard_jar, "MarkDuplicates",
             f"I={bam_file}", f"O={dedup_bam}",
