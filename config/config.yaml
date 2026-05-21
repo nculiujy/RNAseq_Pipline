@@ -1,0 +1,36 @@
+# 支持并行处理的多物种/项目配置
+projects:
+  - species: "TAIR"
+    rawdata_dir: "workflow/resources/TAIR/fastqfile"
+    hisat2_index: "workflow/anno/TAIR10/TAIR10"
+    gtf_file: "workflow/anno/TAIR10/TAIR10.mRNA.gtf"
+    modules:
+      1_download: false
+      2_QC: false
+      3_Align_Filter: true
+      4_DEseq: true
+
+  - species: "homo"
+    rawdata_dir: "workflow/resources/homo/fastqfile"
+    hisat2_index: "workflow/anno/homo/homo_index"
+    gtf_file: "workflow/anno/homo/homo.mRNA.gtf"
+    modules:
+      1_download: false
+      2_QC: false
+      3_Align_Filter: false
+
+  - species: "mm"
+    rawdata_dir: "workflow/resources/mm/fastqfile"
+    hisat2_index: "workflow/anno/mm/mm_index"
+    gtf_file: "workflow/anno/mm/mm.mRNA.gtf"
+    modules:
+      1_download: false
+      2_QC: false
+      3_Align_Filter: false
+
+# 线程配置
+threads: 8
+align_threads: 8
+align_parallel: 2
+quant_threads: 8
+quant_parallel: 2

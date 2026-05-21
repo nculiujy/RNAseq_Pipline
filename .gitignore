@@ -1,0 +1,87 @@
+# 参考文件（不上传）
+参考_README.md
+
+# 测序原始数据（文件体积过大，不上传）
+workflow/resources/TAIR/*
+!workflow/resources/TAIR/.gitkeep
+workflow/resources/homo/*
+!workflow/resources/homo/.gitkeep
+workflow/resources/mm/*
+!workflow/resources/mm/.gitkeep
+
+# 基因组注释文件（文件体积过大，不上传）
+workflow/anno/TAIR10/*.ht2
+workflow/anno/TAIR10/*.fa
+workflow/anno/TAIR10/*.gtf
+workflow/anno/TAIR10/*.bed
+!workflow/anno/TAIR10/README.md
+!workflow/anno/TAIR10/.gitkeep
+
+workflow/anno/homo/*.ht2
+workflow/anno/homo/*.fa
+workflow/anno/homo/*.gtf
+workflow/anno/homo/*.bed
+!workflow/anno/homo/README.md
+!workflow/anno/homo/.gitkeep
+
+workflow/anno/mm/*.ht2
+workflow/anno/mm/*.fa
+workflow/anno/mm/*.gtf
+workflow/anno/mm/*.bed
+!workflow/anno/mm/README.md
+!workflow/anno/mm/.gitkeep
+
+# 分析结果（可重新生成）
+result/*
+!result/.gitkeep
+
+# 日志文件
+logs/*
+!logs/.gitkeep
+
+# Snakemake 缓存
+.snakemake/
+
+# Benchmarks
+benchmarks/*
+!benchmarks/.gitkeep
+
+# IDE 配置
+.trae/
+.vscode/
+*.idea/
+
+# 系统文件
+.DS_Store
+Thumbs.db
+
+# Python 缓存
+__pycache__/
+*.pyc
+*.pyo
+
+# R 临时文件
+*.Rhistory
+*.RData
+*.Rproj.user/
+
+# 压缩包
+*.zip
+*.tar.gz
+*.gz
+!*.fq.gz
+!*.fastq.gz
+
+# 临时文件
+*.tmp
+*.bak
+*.swp
+
+# BAM 和索引文件（体积过大）
+*.bam
+*.bai
+
+# 大型数据文件
+*.ctab
+*.gtf
+!workflow/anno/*/*.gtf
