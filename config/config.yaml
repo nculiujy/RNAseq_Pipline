@@ -2,8 +2,8 @@
 projects:
   - species: "TAIR"
     rawdata_dir: "workflow/resources/TAIR/fastqfile"
-    hisat2_index: "workflow/anno/TAIR10/TAIR10_chr"
-    gtf_file: "workflow/anno/TAIR10/TAIR10_chr.mRNA.gtf"
+    hisat2_index: "workflow/anno/TAIR_arabidopsis/TAIR10_chr"
+    gtf_file: "workflow/anno/TAIR_arabidopsis/TAIR10_chr.mRNA.gtf"
     modules:
       1_download: false
       2_QC: false
