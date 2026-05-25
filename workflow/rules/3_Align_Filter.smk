@@ -30,12 +30,12 @@ rule Align:
     shell:
         """
         python {input.script} \
-            --inputdir {params.inputdir} \
-            --outputdir {params.outputdir} \
+            --inputdir "{params.inputdir}" \
+            --outputdir "{params.outputdir}" \
             --threads {params.threads} \
             --maxparallel {params.max_parallel} \
-            --hisat2_index {params.hisat2_index} \
-            --picard_jar {params.picard_jar} > {log} 2>&1
+            --hisat2_index "{params.hisat2_index}" \
+            --picard_jar "{params.picard_jar}" > {log} 2>&1
         touch {output.marker}
         """
 
@@ -64,12 +64,12 @@ rule Quant:
     shell:
         """
         python {input.script} \
-            --inputdir {params.inputdir} \
-            --outputdir {params.outputdir} \
+            --inputdir "{params.inputdir}" \
+            --outputdir "{params.outputdir}" \
             --threads {params.threads} \
             --maxparallel {params.max_parallel} \
-            --gtf_base {params.gtf_base} \
-            --gtf_file {params.gtf_file} > {log} 2>&1
+            --gtf_base "{params.gtf_base}" \
+            --gtf_file "{params.gtf_file}" > {log} 2>&1
         touch {output.marker}
         """
 
@@ -89,8 +89,8 @@ rule Filter:
     shell:
         """
         python {input.script} \
-            --inputdir {params.inputdir} \
-            --outputdir {params.outputdir} > {log} 2>&1
+            --inputdir "{params.inputdir}" \
+            --outputdir "{params.outputdir}" > {log} 2>&1
         """
 
 rule Merge:
@@ -110,9 +110,9 @@ rule Merge:
     shell:
         """
         python {input.script} \
-            --inputdir {params.inputdir} \
-            --outputdir {params.outputdir} \
-            --filter_csv {input.qc_csv} \
-            --gtf_base {params.gtf_base} > {log} 2>&1
+            --inputdir "{params.inputdir}" \
+            --outputdir "{params.outputdir}" \
+            --filter_csv "{input.qc_csv}" \
+            --gtf_base "{params.gtf_base}" > {log} 2>&1
         touch {output.marker}
         """
