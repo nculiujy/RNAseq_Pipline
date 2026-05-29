@@ -33,7 +33,11 @@ def load_gene_coords(bed_path):
             parts = line.strip().split("\t")
             if len(parts) < 6: continue
             chrom, start, end, name = parts[0], int(parts[1]), int(parts[2]), parts[3]
+            # Index by transcript ID and by locus ID (strip .N suffix)
             coords[name.upper()] = (chrom, (start + end) / 2)
+            locus = name.split(".")[0].upper()
+            if locus not in coords:
+                coords[locus] = (chrom, (start + end) / 2)
     return coords
 
 def chrom_sort_key(c):
