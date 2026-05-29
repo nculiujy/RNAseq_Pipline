@@ -210,8 +210,7 @@ dev.off()
 
 
 deg.data <- deg.data %>% filter(pvalue >= 1e-30)
-need_DEG <- deg.data[, c("log2FoldChange", "padj")]
-colnames(need_DEG) <- c('log2FoldChange', 'padj')
+need_DEG <- deg.data[, c("log2FoldChange", "padj", "pvalue")]
 need_DEG$significance <- as.factor(ifelse(
   need_DEG[[pvalue_col]] < padj_cutoff & abs(need_DEG$log2FoldChange) > log2FC_cutoff,
   ifelse(need_DEG$log2FoldChange > log2FC_cutoff, 'UP', 'DOWN'),
@@ -219,12 +218,12 @@ need_DEG$significance <- as.factor(ifelse(
 ))
 title <- paste0(' Up :  ', nrow(need_DEG[need_DEG$significance == 'UP',]),
                 '\n Down : ', nrow(need_DEG[need_DEG$significance == 'DOWN',]))
-g <- ggplot(data = need_DEG, 
-            aes(x = log2FoldChange, y = -log10(padj), color = significance)) +
+g <- ggplot(data = need_DEG,
+            aes(x = log2FoldChange, y = -log10(.data[[pvalue_col]]), color = significance)) +
   geom_point(alpha = 0.4, size = 1) +
   theme_classic() +
   xlab("log2 ( FoldChange )") +
-  ylab("-log10 ( P.adjust )") +
+  ylab(paste0("-log10 ( ", pvalue_col, " )")) +
   ggtitle(title) +
   scale_colour_manual(values = c('blue', 'grey', 'red')) +
   geom_vline(xintercept = c(-1, 1), lty = 4, col = "grey", lwd = 0.8) +
