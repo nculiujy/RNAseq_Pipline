@@ -1,4 +1,4 @@
-import os
+import os, sys
 
 SPECIES_MAP = {"TAIR": "tair", "homo": "human", "mm": "mouse"}
 
@@ -38,7 +38,7 @@ rule enrichment:
 
             # 5_1: GO + KEGG enrichment
             subprocess.run([
-                "python", params.script_1,
+                sys.executable, params.script_1,
                 "--deg", deg, "--species", sp_code,
                 "--outdir", sub,
                 "--padj", str(params.padj), "--lfc", str(params.lfc)
@@ -47,7 +47,7 @@ rule enrichment:
             # 5_2: Circos plot (requires BED)
             if bed_file and os.path.exists(bed_file):
                 subprocess.run([
-                    "python", params.script_2,
+                    sys.executable, params.script_2,
                     "--deg", deg, "--bed", bed_file,
                     "--outdir", sub,
                     "--padj", str(params.padj), "--lfc", str(params.lfc)
