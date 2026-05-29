@@ -16,11 +16,12 @@ from collections import defaultdict
 
 def parse_args():
     p = argparse.ArgumentParser()
-    p.add_argument("--deg",    required=True, help="DEG result CSV")
-    p.add_argument("--bed",    required=True, help="mRNA BED12 file for gene coordinates")
-    p.add_argument("--outdir", required=True, help="Output directory")
-    p.add_argument("--padj",   type=float, default=0.05)
-    p.add_argument("--lfc",    type=float, default=1.0)
+    p.add_argument("--deg",          required=True, help="DEG result CSV")
+    p.add_argument("--bed",          required=True, help="mRNA BED12 file for gene coordinates")
+    p.add_argument("--outdir",       required=True, help="Output directory")
+    p.add_argument("--pvalue_type",  default="padj", choices=["pvalue","padj"])
+    p.add_argument("--pvalue_cut",   type=float, default=0.05)
+    p.add_argument("--lfc",          type=float, default=1.0)
     return p.parse_args()
 
 def load_gene_coords(bed_path):
@@ -46,7 +47,7 @@ def main():
 
     # Load DEG
     deg = pd.read_csv(args.deg)
-    sig = deg[(deg["padj"] < args.padj) & (deg["log2FoldChange"].abs() >= args.lfc)].copy()
+    sig = deg[(deg[args.pvalue_type] < args.pvalue_cut) & (deg["log2FoldChange"].abs() >= args.lfc)].copy()
     sig["gene_upper"] = sig["SYMBOL"].str.upper()
     print(f"Significant DEGs: {len(sig)}")
 

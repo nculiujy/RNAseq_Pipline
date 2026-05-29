@@ -8,11 +8,12 @@ rule enrichment:
     output:
         flag = "result/{species}/5_enrichment/enrichment_finished.txt"
     params:
-        outdir   = "result/{species}/5_enrichment",
-        script_1 = "workflow/scripts/5_1_enrichment.py",
-        script_2 = "workflow/scripts/5_2_circos.py",
-        padj     = config.get("enrichment_padj", 0.05),
-        lfc      = config.get("enrichment_lfc",  1.0),
+        outdir      = "result/{species}/5_enrichment",
+        script_1    = "workflow/scripts/5_1_enrichment.py",
+        script_2    = "workflow/scripts/5_2_circos.py",
+        pvalue_type = config.get("deg_pvalue_type",   "padj"),
+        pvalue_cut  = config.get("deg_pvalue_cutoff", 0.05),
+        lfc         = config.get("deg_lfc_cutoff",    1.0),
     log:
         "logs/{species}_enrichment.log"
     run:
@@ -41,7 +42,9 @@ rule enrichment:
                 sys.executable, params.script_1,
                 "--deg", deg, "--species", sp_code,
                 "--outdir", sub,
-                "--padj", str(params.padj), "--lfc", str(params.lfc)
+                "--pvalue_type", params.pvalue_type,
+                "--pvalue_cut",  str(params.pvalue_cut),
+                "--lfc",         str(params.lfc)
             ], check=True)
 
             # 5_2: Circos plot (requires BED)
@@ -50,7 +53,9 @@ rule enrichment:
                     sys.executable, params.script_2,
                     "--deg", deg, "--bed", bed_file,
                     "--outdir", sub,
-                    "--padj", str(params.padj), "--lfc", str(params.lfc)
+                    "--pvalue_type", params.pvalue_type,
+                    "--pvalue_cut",  str(params.pvalue_cut),
+                    "--lfc",         str(params.lfc)
                 ], check=True)
             else:
                 print(f"BED file not found ({bed_file}), skipping Circos plot.")

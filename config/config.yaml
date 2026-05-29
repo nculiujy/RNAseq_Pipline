@@ -29,6 +29,11 @@ projects:
       2_QC: false
       3_Align_Filter: false
 
+# DEG 差异基因筛选阈值
+deg_pvalue_type: "padj"   # 使用 "pvalue" 或 "padj"
+deg_pvalue_cutoff: 0.05   # 显著性阈值
+deg_lfc_cutoff: 1.0       # |log2FoldChange| 最小值
+
 # Picard 路径配置
 picard_jar: "workflow/env/picard.jar"
 

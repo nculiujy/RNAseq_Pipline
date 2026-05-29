@@ -19,16 +19,22 @@ library(ggrepel)
 # bed_path <- "/home/yxiaobo/RCProj/tfanno/gencode.vM25.mRNA.annotation.bed"
 
 option_list <- list(
-  make_option(c("--log"), type="character", help="hisat2 logfile"),
-  make_option(c("--deg"), type="character", help="analysiscsvfile"),
-  make_option(c("--outdir_table"), type="character", help=""),
-  make_option(c("--outdir_plot"), type="character", help=""),
-  make_option(c("--bed"), type="character", help="bedfile")
+  make_option(c("--log"),          type="character", help="hisat2 logfile"),
+  make_option(c("--deg"),          type="character", help="DEG result CSV"),
+  make_option(c("--outdir_table"), type="character", help="output table dir"),
+  make_option(c("--outdir_plot"),  type="character", help="output plot dir"),
+  make_option(c("--bed"),          type="character", help="mRNA BED file"),
+  make_option(c("--pvalue_type"),  type="character", default="padj",
+              help="Column for significance filter: pvalue or padj [default: padj]"),
+  make_option(c("--pvalue_cut"),   type="double",    default=0.05,
+              help="Significance threshold [default: 0.05]"),
+  make_option(c("--lfc"),          type="double",    default=1.0,
+              help="|log2FoldChange| threshold [default: 1.0]")
 )
 opt <- parse_args(OptionParser(option_list=option_list))
 
 if(is.null(opt$log) | is.null(opt$deg) | is.null(opt$outdir_table) | is.null(opt$outdir_plot) | is.null(opt$bed)){
-  stop("--log --deg --outdir_table --outdir_plot --bed！")
+  stop("--log --deg --outdir_table --outdir_plot --bed are required!")
 }
 
 if(!dir.exists(opt$outdir_table)) dir.create(opt$outdir_table, recursive=TRUE)
@@ -141,11 +147,12 @@ if (nrow(deg.data) == 0) {
 bed <- read.table(bed_path, sep="\t", header=FALSE, stringsAsFactors=FALSE)
 colnames(bed) <- c('chr', 'start', 'end', 'gene_id', 'score', 'strand')
 
-log2FC_cutoff <- 1
-padj_cutoff <- 0.05
+log2FC_cutoff <- opt$lfc
+pvalue_col    <- opt$pvalue_type   # "pvalue" or "padj"
+padj_cutoff   <- opt$pvalue_cut
 
-up_genes <- dplyr::filter(deg.data, log2FoldChange > log2FC_cutoff, padj < padj_cutoff)
-down_genes <- dplyr::filter(deg.data, log2FoldChange < -log2FC_cutoff, padj < padj_cutoff)
+up_genes   <- dplyr::filter(deg.data, log2FoldChange >  log2FC_cutoff, .data[[pvalue_col]] < padj_cutoff)
+down_genes <- dplyr::filter(deg.data, log2FoldChange < -log2FC_cutoff, .data[[pvalue_col]] < padj_cutoff)
 
 matched_up <- merge(up_genes[, c("gene_id", "SYMBOL")], bed, by="gene_id")
 matched_down <- merge(down_genes[, c("gene_id", "SYMBOL")], bed, by="gene_id")
@@ -206,7 +213,7 @@ deg.data <- deg.data %>% filter(pvalue >= 1e-30)
 need_DEG <- deg.data[, c("log2FoldChange", "padj")]
 colnames(need_DEG) <- c('log2FoldChange', 'padj')
 need_DEG$significance <- as.factor(ifelse(
-  need_DEG$padj < padj_cutoff & abs(need_DEG$log2FoldChange) > log2FC_cutoff,
+  need_DEG[[pvalue_col]] < padj_cutoff & abs(need_DEG$log2FoldChange) > log2FC_cutoff,
   ifelse(need_DEG$log2FoldChange > log2FC_cutoff, 'UP', 'DOWN'),
   'NOT'
 ))

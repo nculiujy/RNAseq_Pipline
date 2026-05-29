@@ -17,13 +17,14 @@ from statsmodels.stats.multitest import multipletests
 # ── CLI ───────────────────────────────────────────────────────────────────────
 def parse_args():
     p = argparse.ArgumentParser()
-    p.add_argument("--deg",     required=True, help="DEG result CSV (from 4_1_RNAseq_DEseq.R)")
-    p.add_argument("--species", required=True, choices=["tair","human","mouse"],
-                   help="Species: tair | human | mouse")
-    p.add_argument("--outdir",  required=True, help="Output directory")
-    p.add_argument("--padj",    type=float, default=0.05, help="DEG padj threshold")
-    p.add_argument("--lfc",     type=float, default=1.0,  help="|log2FC| threshold")
-    p.add_argument("--top_n",   type=int,   default=10,   help="Top N terms per namespace")
+    p.add_argument("--deg",          required=True, help="DEG result CSV (from 4_1_RNAseq_DEseq.R)")
+    p.add_argument("--species",      required=True, choices=["tair","human","mouse"])
+    p.add_argument("--outdir",       required=True, help="Output directory")
+    p.add_argument("--pvalue_type",  default="padj", choices=["pvalue","padj"],
+                   help="Column to filter on: pvalue or padj")
+    p.add_argument("--pvalue_cut",   type=float, default=0.05, help="Significance threshold")
+    p.add_argument("--lfc",          type=float, default=1.0,  help="|log2FC| threshold")
+    p.add_argument("--top_n",        type=int,   default=10,   help="Top N terms per namespace")
     return p.parse_args()
 
 # ── Download helpers ──────────────────────────────────────────────────────────
@@ -246,7 +247,7 @@ def main():
     # Load DEG
     deg = pd.read_csv(args.deg)
     # Column names from 4_1_RNAseq_DEseq.R output: SYMBOL, log2FoldChange, padj
-    sig_mask = (deg["padj"] < args.padj) & (deg["log2FoldChange"].abs() >= args.lfc)
+    sig_mask = (deg[args.pvalue_type] < args.pvalue_cut) & (deg["log2FoldChange"].abs() >= args.lfc)
     study_genes = set(deg.loc[sig_mask, "SYMBOL"].dropna().str.upper())
     print(f"Significant DEGs: {len(study_genes)}")
     if not study_genes:

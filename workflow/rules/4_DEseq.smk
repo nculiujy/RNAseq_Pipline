@@ -29,9 +29,12 @@ rule DEseq_analysis:
     output:
         flag = "result/{species}/4_DEseq/DEseq_finished.txt"
     params:
-        outdir = "result/{species}/4_DEseq",
-        script_4_1 = "workflow/scripts/4_1_RNAseq_DEseq.R",
-        script_4_2 = "workflow/scripts/4_2_DEseq_result_plot_pipline.R"
+        outdir       = "result/{species}/4_DEseq",
+        script_4_1   = "workflow/scripts/4_1_RNAseq_DEseq.R",
+        script_4_2   = "workflow/scripts/4_2_DEseq_result_plot_pipline.R",
+        pvalue_type  = config.get("deg_pvalue_type",   "padj"),
+        pvalue_cut   = config.get("deg_pvalue_cutoff", 0.05),
+        lfc          = config.get("deg_lfc_cutoff",    1.0)
     log:
         "logs/{species}_DEseq.log"
     run:
@@ -116,7 +119,10 @@ rule DEseq_analysis:
                 "--deg", deg_out,
                 "--outdir_table", outdir_table,
                 "--outdir_plot", outdir_plot,
-                "--bed", bed_file
+                "--bed", bed_file,
+                "--pvalue_type", str(params.pvalue_type),
+                "--pvalue_cut",  str(params.pvalue_cut),
+                "--lfc",         str(params.lfc)
             ]
             print(f"Running Plots for {base_name}...")
             subprocess.run(cmd2, check=True)
