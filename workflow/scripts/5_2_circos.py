@@ -140,19 +140,19 @@ def main():
         cur = cur - span - GAP
 
     # ── Draw ──────────────────────────────────────────────────────────────────
-    fig, ax = plt.subplots(figsize=(12, 12))
+    fig, ax = plt.subplots(figsize=(14, 14))
     ax.set_aspect("equal")
     ax.axis("off")
-    ax.set_xlim(-1.6, 1.6)
-    ax.set_ylim(-1.6, 1.6)
+    ax.set_xlim(-2.2, 2.2)
+    ax.set_ylim(-2.2, 2.2)
 
-    R_OUT   = 1.20   # outer edge of chromosome arc
-    R_IN    = 1.10   # inner edge of chromosome arc
-    R_TICK  = 1.08   # tick marks for genes
-    R_DOT   = 1.04   # dot track (beige band inner edge)
-    R_BAND_OUT = 1.09
-    R_BAND_IN  = 0.98
-    R_LINK  = 0.97   # Bezier link attachment radius
+    R_OUT   = 1.30   # outer edge of chromosome arc
+    R_IN    = 1.18   # inner edge of chromosome arc
+    R_TICK  = 1.16   # tick marks for genes
+    R_DOT   = 1.10   # dot track
+    R_BAND_OUT = 1.17
+    R_BAND_IN  = 1.02
+    R_LINK  = 1.01   # Bezier link attachment radius
 
     # Draw beige inner band
     theta_all = np.linspace(0, 2*np.pi, 500)
@@ -171,7 +171,7 @@ def main():
         color = CHR_COLORS.get(c, DEFAULT_COLOR)
         theta = np.linspace(e, s, 300)
         # Outer arc
-        ax.plot(np.cos(theta)*R_OUT, np.sin(theta)*R_OUT, color=color, lw=4, solid_capstyle="butt", zorder=3)
+        ax.plot(np.cos(theta)*R_OUT, np.sin(theta)*R_OUT, color=color, lw=5, solid_capstyle="butt", zorder=3)
         # Inner arc boundary
         ax.plot(np.cos(theta)*R_IN, np.sin(theta)*R_IN, color=color, lw=1, alpha=0.4, zorder=3)
         # End caps
@@ -181,9 +181,9 @@ def main():
                     color=color, lw=1.5, zorder=3)
         # Chromosome label
         mid_a = (s+e)/2
-        lx, ly = np.cos(mid_a)*1.32, np.sin(mid_a)*1.32
+        lx, ly = np.cos(mid_a)*1.44, np.sin(mid_a)*1.44
         lbl = c.replace("Chr","").replace("chr","")
-        ax.text(lx, ly, lbl, ha="center", va="center", fontsize=11,
+        ax.text(lx, ly, lbl, ha="center", va="center", fontsize=13,
                 fontweight="bold", color=color)
 
     # Draw DEG ticks and gene labels on the chromosome ring
@@ -194,15 +194,15 @@ def main():
         ax.plot([np.cos(a)*R_IN, np.cos(a)*R_TICK],
                 [np.sin(a)*R_IN, np.sin(a)*R_TICK],
                 color="#333333", lw=0.8, zorder=4)
-        # Gene label (outside the arc)
-        lx, ly = np.cos(a)*1.14, np.sin(a)*1.14
+        # Gene label — placed between chromosome arc and outer label zone
+        lx, ly = np.cos(a)*1.23, np.sin(a)*1.23
         rot = np.degrees(a)
         if np.cos(a) < 0:
             rot += 180
         row_data = sig.loc[row_idx]
         label = str(row_data.get("SYMBOL", row_data.get("gene_id", "")))
         ax.text(lx, ly, label, ha="left" if np.cos(a)>=0 else "right",
-                va="center", fontsize=4.5, rotation=rot, rotation_mode="anchor",
+                va="center", fontsize=5.5, rotation=rot, rotation_mode="anchor",
                 color="#333333", zorder=5)
         # Dot on band
         dot_color = "#E74C3C" if lfc > 0 else "#3498DB"
