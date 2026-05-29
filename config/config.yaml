@@ -9,6 +9,7 @@ projects:
       2_QC: false
       3_Align_Filter: true
       4_DEseq: true
+      5_enrichment: true
 
   - species: "homo"
     rawdata_dir: "workflow/resources/homo/fastqfile"

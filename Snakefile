@@ -8,6 +8,7 @@ PROJECTS = config.get("projects", [])
 
 include: "workflow/rules/3_Align_Filter.smk"
 include: "workflow/rules/4_DEseq.smk"
+include: "workflow/rules/5_enrichment.smk"
 
 for proj in PROJECTS:
     species = proj["species"]
@@ -17,6 +18,8 @@ for proj in PROJECTS:
         TARGET_FILES.append(os.path.join("result", species, "3_Align_Filter", "Merge_finished.txt"))
     if modules.get("4_DEseq", False):
         TARGET_FILES.append(os.path.join("result", species, "4_DEseq", "DEseq_finished.txt"))
+    if modules.get("5_enrichment", False):
+        TARGET_FILES.append(os.path.join("result", species, "5_enrichment", "enrichment_finished.txt"))
 
 rule all:
     input:
