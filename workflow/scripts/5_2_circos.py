@@ -54,15 +54,18 @@ def main():
     # Load BED coordinates
     coords = load_gene_coords(args.bed)
 
-    # Map DEGs to chromosomes
-    chrom_up   = defaultdict(list)   # chrom -> list of midpoints (up-regulated)
-    chrom_down = defaultdict(list)   # chrom -> list of midpoints (down-regulated)
+    # Map DEGs to chromosomes — try gene_id (AGI locus) first, then SYMBOL
+    chrom_up   = defaultdict(list)
+    chrom_down = defaultdict(list)
     chrom_sizes = defaultdict(int)
 
     for _, row in sig.iterrows():
         gene = row["gene_upper"]
-        if gene not in coords: continue
-        chrom, mid = coords[gene]
+        # Also try gene_id column (AGI locus like AT1G01010)
+        gene_id_upper = str(row.get("gene_id", "")).upper() if "gene_id" in sig.columns else ""
+        hit = coords.get(gene) or coords.get(gene_id_upper)
+        if not hit: continue
+        chrom, mid = hit
         if row["log2FoldChange"] > 0:
             chrom_up[chrom].append(mid)
         else:

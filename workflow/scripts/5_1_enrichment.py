@@ -144,7 +144,10 @@ def plot_go(result, top_n, outdir, prefix):
 KEGG_ORG = {"tair": "ath", "human": "hsa", "mouse": "mmu"}
 
 def fetch_kegg_pathway_genes(org, cache_dir):
-    """Fetch KEGG pathway→gene mapping via KEGG REST API."""
+    """Fetch KEGG pathway→gene mapping via KEGG REST API.
+    Uses endpoint: https://rest.kegg.jp/link/{org}/path:{org}XXXXX
+    Returns gene IDs as uppercase AGI locus IDs (e.g. AT1G01090).
+    """
     list_file = os.path.join(cache_dir, f"kegg_{org}_pathways.txt")
     if not os.path.exists(list_file):
         print(f"Fetching KEGG pathway list for {org} …")
@@ -154,24 +157,30 @@ def fetch_kegg_pathway_genes(org, cache_dir):
     pathways = {}
     with open(list_file) as f:
         for line in f:
-            pid = line.split("\t")[0].strip()   # e.g. path:ath00010
-            pathways[pid] = line.split("\t")[1].strip() if "\t" in line else pid
+            parts = line.strip().split("\t")
+            if len(parts) >= 2:
+                pid  = parts[0].strip()   # e.g. path:ath00010
+                name = parts[1].strip()
+                pathways[pid] = name
 
     pw2genes = {}
     for pid, name in pathways.items():
-        gene_file = os.path.join(cache_dir, f"{pid.replace(':', '_')}_genes.txt")
-        if not os.path.exists(gene_file):
-            url = f"https://rest.kegg.jp/link/genes/{pid}"
+        safe = pid.replace(":", "_").replace("/", "_")
+        gene_file = os.path.join(cache_dir, f"{safe}_genes.txt")
+        if not os.path.exists(gene_file) or os.path.getsize(gene_file) == 0:
+            # Correct endpoint: link/{org}/path:{org}XXXXX
+            url = f"https://rest.kegg.jp/link/{org}/{pid}"
             try:
                 _download(url, gene_file)
-            except Exception:
+            except Exception as e:
+                print(f"  Warning: could not fetch {pid}: {e}")
                 open(gene_file, "w").close()
         genes = set()
         with open(gene_file) as f:
             for line in f:
                 parts = line.strip().split("\t")
                 if len(parts) == 2:
-                    # gene id like "ath:AT1G01010" → "AT1G01010"
+                    # format: "path:ath00010\tath:AT1G01090"
                     genes.add(parts[1].split(":")[-1].upper())
         if genes:
             pw2genes[pid] = {"name": name, "genes": genes}
@@ -246,11 +255,14 @@ def main():
 
     # Load DEG
     deg = pd.read_csv(args.deg)
-    # Column names from 4_1_RNAseq_DEseq.R output: SYMBOL, log2FoldChange, padj
+    # Column names from 4_1_RNAseq_DEseq.R output: SYMBOL, gene_id, log2FoldChange, padj, pvalue
     sig_mask = (deg[args.pvalue_type] < args.pvalue_cut) & (deg["log2FoldChange"].abs() >= args.lfc)
-    study_genes = set(deg.loc[sig_mask, "SYMBOL"].dropna().str.upper())
-    print(f"Significant DEGs: {len(study_genes)}")
-    if not study_genes:
+    sig_df = deg.loc[sig_mask].copy()
+    # GO uses gene symbols; KEGG uses AGI locus IDs (gene_id column)
+    study_symbols = set(sig_df["SYMBOL"].dropna().str.upper())
+    study_loci    = set(sig_df["gene_id"].dropna().str.upper()) if "gene_id" in sig_df.columns else study_symbols
+    print(f"Significant DEGs: {len(study_symbols)} (symbols), {len(study_loci)} (loci)")
+    if not study_symbols:
         print("No DEGs passed threshold. Exiting.")
         sys.exit(0)
 
@@ -264,7 +276,8 @@ def main():
 
     obo = parse_obo(obo_path)
     gene2go, go2genes = parse_gaf(gaf_path, obo)
-    go_result = run_go_fisher(study_genes, gene2go, go2genes, obo)
+    # GO GAF uses both symbols and loci — try both
+    go_result = run_go_fisher(study_symbols | study_loci, gene2go, go2genes, obo)
     if not go_result.empty:
         go_result.to_csv(os.path.join(args.outdir, f"{prefix}_GO_enrichment.csv"), index=False)
         plot_go(go_result, args.top_n, args.outdir, prefix)
@@ -272,11 +285,19 @@ def main():
     # ── KEGG ──────────────────────────────────────────────────────────────────
     org = KEGG_ORG.get(args.species)
     if org:
+        # Delete empty cached gene files so they get re-fetched with correct URL
+        cache_dir_path = cache_dir
+        for fn in os.listdir(cache_dir_path):
+            if fn.endswith("_genes.txt") and os.path.getsize(os.path.join(cache_dir_path, fn)) == 0:
+                os.remove(os.path.join(cache_dir_path, fn))
         pw2genes = fetch_kegg_pathway_genes(org, cache_dir)
-        kegg_result = run_kegg_fisher(study_genes, pw2genes)
+        # KEGG uses AGI locus IDs
+        kegg_result = run_kegg_fisher(study_loci, pw2genes)
         if not kegg_result.empty:
             kegg_result.to_csv(os.path.join(args.outdir, f"{prefix}_KEGG_enrichment.csv"), index=False)
             plot_kegg(kegg_result, args.top_n, args.outdir, prefix)
+        else:
+            print("No significant KEGG pathways found.")
     else:
         print(f"No KEGG organism code for species '{args.species}'. Skipping KEGG.")
 
