@@ -127,12 +127,26 @@ RNAseq_Pipline/
 
 ### 环境配置（一键安装）
 
-项目根目录提供了完整的 [`environment.yml`](environment.yml)，可一键还原所有依赖：
+项目根目录提供了完整的 [`environment.yml`](environment.yml)，可一键还原所有 Python/工具依赖：
 
 ```bash
 conda env create -f environment.yml
 conda activate RNAseq_Pipline
 ```
+
+### R 包安装（版本锁定）
+
+R 包需在 conda 环境激活后单独安装。[`workflow/env/install_R_packages.R`](workflow/env/install_R_packages.R) 锁定了精确版本（DESeq2 1.44.0、ggplot2 3.5.1 等），确保跨服务器结果一致：
+
+```bash
+conda activate RNAseq_Pipline
+Rscript workflow/env/install_R_packages.R
+```
+
+> **一键部署新服务器**：也可直接运行 [`workflow/env/setup_new_server.sh`](workflow/env/setup_new_server.sh)，自动完成 conda 环境创建 + R 包安装 + 工具验证：
+> ```bash
+> bash workflow/env/setup_new_server.sh
+> ```
 
 ### Picard 安装
 

@@ -8,7 +8,6 @@ library(DESeq2)
 library(yaml)
 library(optparse)
 
-.libPaths(c("/usr/local/R/lib64/R/library", .libPaths()))
 
 option_list <- list(
   make_option(c("-i", "--input"), type = "character", help = "Path to the gene count matrix CSV file"),
